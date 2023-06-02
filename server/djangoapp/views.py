@@ -41,7 +41,7 @@ def login_request(request):
         
         if user is not None:
             login(request, user)
-            return redirect('index')  # Replace 'home' with the name of your home page URL pattern
+            return redirect('index.html')  # Replace 'home' with the name of your home page URL pattern
         else:
             return render(request, 'login.html', {'error_message': 'Invalid credentials'})
     
@@ -53,29 +53,29 @@ def login_request(request):
 # def logout_request(request):
 def logout_request(request):
     logout(request)
-    return redirect('index')  # Replace 'home' with the name of your home page URL pattern
+    return redirect('index.html')  # Replace 'home' with the name of your home page URL pattern
 
 
 # ...
 
 # Create a `registration_request` view to handle sign up request
 # def registration_request(request):
-def registration_request(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        email = request.POST.get('email')
+# def registration_request(request):
+#     if request.method == 'POST':
+#         username = request.POST.get('username')
+#         password = request.POST.get('password')
+#         email = request.POST.get('email')
         
-        # Check if the username or email already exists
-        if User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists():
-            return render(request, 'registration.html', {'error_message': 'Username or email already exists'})
+#         # Check if the username or email already exists
+#         if User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists():
+#             return render(request, 'registration.html', {'error_message': 'Username or email already exists'})
         
-        # Create a new user
-        user = User.objects.create_user(username=username, password=password, email=email)
-        login(request, user)
-        return redirect('index')  # Replace 'home' with the name of your home page URL pattern
+#         # Create a new user
+#         user = User.objects.create_user(username=username, password=password, email=email)
+#         login(request, user)
+#         return redirect('index')  # Replace 'home' with the name of your home page URL pattern
     
-    return render(request, 'registration.html')
+#     return render(request, 'registration.html')
 
 # ...
 
@@ -114,3 +114,23 @@ def add_review(request, dealer_id):
 
 # ...
 
+
+
+def registration_request(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        email = request.POST.get('email')
+        firstname = request.POST.get('firstname')
+        lastname = request.POST.get('lastname')
+        
+        # Check if the username or email already exists
+        if User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists():
+            return render(request, 'registration.html', {'error_message': 'Username or email already exists'})
+        
+        # Create a new user
+        user = User.objects.create_user(username=username, password=password, email=email, first_name=firstname, last_name=lastname)
+        login(request, user)
+        return redirect('index.html')  # Replace 'index' with the name of your home page URL pattern
+    
+    return render(request, 'registration.html')
