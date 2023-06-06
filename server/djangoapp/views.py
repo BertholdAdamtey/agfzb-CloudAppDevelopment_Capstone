@@ -86,13 +86,15 @@ def logout_request(request):
 #         return render(request, 'djangoapp/index.html', context)
 def get_dealerships(request):
     if request.method == "GET":
-        url = "https://us-south.functions.appdomain.cloud/api/v1/web/05baace2-8068-461e-8db5-a518a3df5e7d/dealership-package/get-dealership/dealerships/dealer-get"
-        # Get dealers from the URL
-        dealerships = get_dealers_from_cf(url)
-        # Concat all dealer's short name
-        dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
-        # Return a list of dealer short name
-        return HttpResponse(dealer_names)
+        context = {}
+        url = "https://da9adc8a-0d7d-49a3-9047-364a337f4cf3-bluemix.cloudantnosqldb.appdomain.cloud"
+        # Get dealers from the Cloudant DB
+        context["dealerships"] = get_dealers_from_cf(url)
+
+        # dealer_names = ' '.join([dealer.short_name for dealer in context["dealerships"]])
+        # return HttpResponse(dealer_names)
+
+        return render(request, 'djangoapp/index.html', context)
 
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
