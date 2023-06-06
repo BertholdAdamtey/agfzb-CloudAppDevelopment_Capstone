@@ -10,16 +10,50 @@ from requests.auth import HTTPBasicAuth
 #                                     auth=HTTPBasicAuth('apikey', api_key))
 
 
+
+def post_request(url, json_payload, **kwargs):
+    response = requests.post(url, json=json_payload, **kwargs)
+    return response
+
+
 def get_request(url, **kwargs):
     print(kwargs)
     print("GET from {} ".format(url))
-    try:
-        # Call get method of requests library with URL and parameters
-        response = requests.get(url, headers={'Content-Type': 'application/json'},
+    # if api_key:
+    #     # Basic authentication GET
+    #     try:
+    #      response = requests.get(url, headers={'Content-Type': 'application/json'},
+    #                             params=kwargs, auth=HTTPBasicAuth('apikey', api_key))
+    # # except:
+    #         print("An error occurred while making GET request. ")
+    # else:
+    #     # No authentication GET
+    #     try:
+    #         response = requests.get(url, headers={'Content-Type': 'application/json'},
+    #                                 params=kwargs)
+    # except:
+    #     # If any error occurs
+    #     print("Network exception occurred")
+    # status_code = response.status_code
+    # print("With status {} ".format(status_code))
+    # json_data = json.loads(response.text)
+    # return json_data
+    if api_key:
+        # Basic authentication GET
+        try:
+            response = requests.get(url, headers={'Content-Type': 'application/json'},
+                                    params=kwargs, auth=HTTPBasicAuth('apikey', api_key))
+        except:
+            print("An error occurred while making GET request. ")
+    else:
+        # No authentication GET
+        try:
+            response = requests.get(url, headers={'Content-Type': 'application/json'},
                                     params=kwargs)
-    except:
-        # If any error occurs
-        print("Network exception occurred")
+        except:
+            print("An error occurred while making GET request. ")
+
+    # Retrieving the response status code and content
     status_code = response.status_code
     print("With status {} ".format(status_code))
     json_data = json.loads(response.text)
@@ -59,34 +93,71 @@ def get_dealers_from_cf(url, **kwargs):
 # - Call get_request() with specified arguments
 # - Parse JSON results into a DealerView object list
 
-from models import DealerReview
-
 def get_dealer_reviews_from_cf(dealer_id):
     url = f"https://your-api-url.com/reviews?dealerId={dealer_id}"
     response = get_request(url, dealerId=dealer_id)
-    
+
     reviews = []
     for review_data in response.json():
         dealership = review_data.get("dealership")
         name = review_data.get("name")
         purchase = review_data.get("purchase")
-        review = review_data.get("review")
+        review_text = review_data.get("review")  # Renamed 'review' variable to 'review_text'
         purchase_date = review_data.get("purchase_date")
         car_make = review_data.get("car_make")
         car_model = review_data.get("car_model")
         car_year = review_data.get("car_year")
-        sentiment = review_data.get("sentiment")
         review_id = review_data.get("id")
-        
-        review = DealerReview(dealership, name, purchase, review, purchase_date, car_make, car_model, car_year, sentiment, review_id)
+
+        review = DealerReview(
+            dealership,
+            name,
+            purchase,
+            review_text,
+            purchase_date,
+            car_make,
+            car_model,
+            car_year,
+            sentiment=None,  
+            review_id=review_id
+        )
+
+        review.sentiment = analyze_review_sentiments(review_text)  # Assign sentiment using analyze_review_sentiments
+
         reviews.append(review)
-    
+
     return reviews
+
 
 # Create an `analyze_review_sentiments` method to call Watson NLU and analyze text
 # def analyze_review_sentiments(text):
 # - Call get_request() with specified arguments
 # - Get the returned sentiment label such as Positive or Negative
 
+
+
+def analyze_review_sentiments(dealerreview):
+    url = "https://example.com/analyze_sentiments"
+    api_key = "your_api_key"
+    
+    params = {
+        "text": dealerreview,
+        "version": "your_version",
+        "features": "your_features",
+        "return_analyzed_text": "your_return_analyzed_text"
+    }
+
+    response = get_request(url, params=params, api_key=api_key)
+    # Process the response here
+
+def get_request(url, params=None, api_key=None):
+    headers = {
+        "Content-Type": "application/json"
+    }
+    auth = HTTPBasicAuth("apikey", api_key) if api_key else None
+
+    response = requests.get(url, params=params, headers=headers, auth=auth)
+    # Handle the response and return the result
+    return response
 
 

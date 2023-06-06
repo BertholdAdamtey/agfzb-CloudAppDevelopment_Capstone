@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
-# from .models import DealerReview
+from .models import DealerReview
 from .restapis import get_dealers_from_cf, get_dealer_reviews_from_cf
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
@@ -100,25 +100,58 @@ def get_dealerships(request):
 def get_dealer_details(request, dealer_id):
     dealer = get_object_or_404(Dealer, id=dealer_id)
     reviews = dealer.review_set.all()  # Assuming you have a related model named `Review` for dealer reviews
-    
+
+    for review in reviews:
+        review.sentiment = analyze_review_sentiments(review.review_text)  # Assign sentiment using analyze_review_sentiments
+
     return render(request, 'dealer_details.html', {'dealer': dealer, 'reviews': reviews})
 
-# ...
+
+# ..
 
 # Create a `add_review` view to submit a review
 # def add_review(request, dealer_id):
+
+# from django.contrib.auth.decorators import login_required
+
+# @login_required
 def add_review(request, dealer_id):
     dealer = get_object_or_404(Dealer, id=dealer_id)
-    
+
     if request.method == 'POST':
         rating = request.POST.get('rating')
         comment = request.POST.get('comment')
-        
+
         review = Review(dealer=dealer, rating=rating, comment=comment)
+
+        # Append additional attributes to the review dictionary
+        review_data = {
+            "time": datetime.utcnow().isoformat(),
+            "name": request.user.username,
+            "dealership": dealer_id,
+            "review": comment,
+            "purchase": None  # Add any additional attributes you defined in your review-post cloud function
+        }
+
+        # Add the attributes to the review object
+        for key, value in review_data.items():
+            setattr(review, key, value)
+
         review.save()
-        
+
+         # Create the JSON payload
+        json_payload = {
+            "review": review
+        }
+
+        url = "https://your-api-url.com/post_review"
+        response = post_request(url, json_payload, dealerId=dealer_id)
+
+        # Print the response in the console
+        print(response.json())
+
         return redirect('dealer_details', dealer_id=dealer_id)
-    
+
     return render(request, 'add_review.html', {'dealer': dealer})
 
 # ...
