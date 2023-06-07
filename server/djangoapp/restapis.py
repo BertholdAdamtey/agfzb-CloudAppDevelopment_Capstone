@@ -94,7 +94,7 @@ def get_dealers_from_cf(url, **kwargs):
 # - Parse JSON results into a DealerView object list
 
 def get_dealer_reviews_from_cf(dealer_id):
-    url = f"https://your-api-url.com/reviews?dealerId={dealer_id}"
+    url = f"https://eu-de.functions.appdomain.cloud/api/v1/web/334d0dd7-f8d4-4bbf-a8b9-763e83ba4a2d/dealership-package/get_review/reviews?dealerId={dealer_id}"
     response = get_request(url, dealerId=dealer_id)
 
     reviews = []

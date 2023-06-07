@@ -87,7 +87,7 @@ def logout_request(request):
 def get_dealerships(request):
     if request.method == "GET":
         context = {}
-        url = "https://da9adc8a-0d7d-49a3-9047-364a337f4cf3-bluemix.cloudantnosqldb.appdomain.cloud"
+        url = "https://eu-de.functions.appdomain.cloud/api/v1/web/334d0dd7-f8d4-4bbf-a8b9-763e83ba4a2d/dealership-package/get-dealership"
         # Get dealers from the Cloudant DB
         context["dealerships"] = get_dealers_from_cf(url)
 
@@ -146,7 +146,7 @@ def add_review(request, dealer_id):
             "review": review
         }
 
-        url = "https://your-api-url.com/post_review"
+        url = "https://us-south.functions.appdomain.cloud/api/v1/web/05baace2-8068-461e-8db5-a518a3df5e7d/dealership-package/post-review"
         response = post_request(url, json_payload, dealerId=dealer_id)
 
         # Print the response in the console
